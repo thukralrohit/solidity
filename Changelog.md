@@ -1,6 +1,8 @@
 ### 0.4.20 (unreleased)
 
 Features:
+ * Code Generator: Use STATICCALL opcode for calling view and pure functions. Enable
+   via `pragma experimental STATICCALL;`.
  * Inline Assembly: Issue warning for using jump labels (already existed for jump instructions).
 
 Bugfixes:
