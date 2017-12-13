@@ -53,6 +53,13 @@ struct TypedName;
 using Expression = boost::variant<FunctionalInstruction, FunctionCall, Identifier, Literal>;
 using Statement = boost::variant<ExpressionStatement, Instruction, Label, StackAssignment, Assignment, VariableDeclaration, FunctionDefinition, If, Switch, ForLoop, Block>;
 
+enum class AsmFlavour
+{
+	IULIA, // Types, no EVM instructions as functions
+	Loose, // no types, EVM instructions as function and also direct stack manipulations
+	Strict // no types, EVM instructions as functions but no jumps and no direct stack manipulations
+};
+
 }
 }
 }
