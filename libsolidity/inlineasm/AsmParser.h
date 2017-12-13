@@ -37,7 +37,8 @@ namespace assembly
 class Parser: public ParserBase
 {
 public:
-	explicit Parser(ErrorReporter& _errorReporter, bool _julia = false): ParserBase(_errorReporter), m_julia(_julia) {}
+	explicit Parser(ErrorReporter& _errorReporter, AsmFlavour _flavour = AsmFlavour::Loose):
+		ParserBase(_errorReporter), m_flavour(_flavour) {}
 
 	/// Parses an inline assembly block starting with `{` and ending with `}`.
 	/// @returns an empty shared pointer on error.
@@ -80,7 +81,7 @@ protected:
 	static bool isValidNumberLiteral(std::string const& _literal);
 
 private:
-	bool m_julia = false;
+	AsmFlavour m_flavour = AsmFlavour::Loose;
 };
 
 }
