@@ -42,6 +42,11 @@ void ASTWalker::operator()(FunctionCall const& _funCall)
 	walkVector(_funCall.arguments | boost::adaptors::reversed);
 }
 
+void ASTWalker::operator()(ExpressionStatement const& _statement)
+{
+	boost::apply_visitor(*this, _statement.expression);
+}
+
 void ASTWalker::operator()(Assignment const& _assignment)
 {
 	for (auto const& name: _assignment.variableNames)
@@ -81,8 +86,8 @@ void ASTWalker::operator()(ForLoop const& _for)
 {
 	(*this)(_for.pre);
 	boost::apply_visitor(*this, *_for.condition);
-	(*this)(_for.post);
 	(*this)(_for.body);
+	(*this)(_for.post);
 }
 
 void ASTWalker::operator()(Block const& _block)
@@ -98,6 +103,11 @@ void ASTModifier::operator()(FunctionalInstruction& _instr)
 void ASTModifier::operator()(FunctionCall& _funCall)
 {
 	walkVector(_funCall.arguments | boost::adaptors::reversed);
+}
+
+void ASTModifier::operator()(ExpressionStatement& _statement)
+{
+	boost::apply_visitor(*this, _statement.expression);
 }
 
 void ASTModifier::operator()(Assignment& _assignment)

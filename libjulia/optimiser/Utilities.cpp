@@ -1,4 +1,4 @@
-/*
+/*(
 	This file is part of solidity.
 
 	solidity is free software: you can redistribute it and/or modify
@@ -15,36 +15,25 @@
 	along with solidity.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * Specific AST copier that replaces certain identifiers with expressions.
+ * Some useful snippets for the optimiser.
  */
 
-#pragma once
+#include <libjulia/optimiser/Utilities.h>
 
-#include <libjulia/optimiser/ASTCopier.h>
+#include <libsolidity/inlineasm/AsmData.h>
 
-#include <string>
-#include <map>
-#include <set>
+#include <libdevcore/CommonData.h>
 
-namespace dev
+#include <boost/range/algorithm_ext/erase.hpp>
+
+using namespace std;
+using namespace dev;
+using namespace dev::julia;
+
+void dev::julia::removeEmptyBlocks(Block& _block)
 {
-namespace julia
-{
-
-/**
- * Specific AST copier that replaces certain identifiers with expressions.
- */
-class Substitution: public ASTCopier
-{
-public:
-	Substitution(std::map<std::string, Expression const*> const& _substitutions):
-		m_substitutions(_substitutions)
-	{}
-	virtual Expression translate(Expression const& _expression) override;
-
-private:
-	std::map<std::string, Expression const*> const& m_substitutions;
-};
-
-}
+	auto isEmptyBlock = [](Statement const& _st) -> bool {
+		return _st.type() == typeid(Block) && boost::get<Block>(_st).statements.empty();
+	};
+	boost::range::remove_erase_if(_block.statements, isEmptyBlock);
 }

@@ -1,4 +1,4 @@
-/*
+/*(
 	This file is part of solidity.
 
 	solidity is free software: you can redistribute it and/or modify
@@ -15,25 +15,43 @@
 	along with solidity.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * Specific AST copier that replaces certain identifiers with expressions.
+ * Specific AST walkers that collect semantical facts.
  */
 
-#include <libjulia/optimiser/Substitution.h>
+#include <libjulia/optimiser/Semantics.h>
 
 #include <libsolidity/inlineasm/AsmData.h>
+
+#include <libevmasm/SemanticInformation.h>
+
+#include <libdevcore/CommonData.h>
 
 using namespace std;
 using namespace dev;
 using namespace dev::julia;
 
-Expression Substitution::translate(Expression const& _expression)
+void MovableChecker::operator()(Identifier const& _identifier)
 {
-	if (_expression.type() == typeid(Identifier))
-	{
-		string const& name = boost::get<Identifier>(_expression).name;
-		if (m_substitutions.count(name))
-			// No recursive substitution
-			return ASTCopier().translate(*m_substitutions.at(name));
-	}
-	return ASTCopier::translate(_expression);
+	ASTWalker::operator()(_identifier);
+	m_referencedVariables.insert(_identifier.name);
+}
+
+void MovableChecker::operator()(FunctionalInstruction const& _instr)
+{
+	if (!eth::SemanticInformation::movable(_instr.instruction))
+		m_movable = false;
+	else
+		ASTWalker::operator()(_instr);
+}
+
+void MovableChecker::operator()(FunctionCall const&)
+{
+	m_movable = false;
+}
+
+bool Semantics::movable(Expression const& _expression)
+{
+	MovableChecker checker;
+	checker.visit(_expression);
+	return checker.movable();
 }

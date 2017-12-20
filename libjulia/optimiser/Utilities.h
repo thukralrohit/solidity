@@ -15,36 +15,20 @@
 	along with solidity.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * Specific AST copier that replaces certain identifiers with expressions.
+ * Small useful snippets for the optimiser.
  */
 
 #pragma once
 
-#include <libjulia/optimiser/ASTCopier.h>
-
-#include <string>
-#include <map>
-#include <set>
+#include <libjulia/ASTDataForward.h>
 
 namespace dev
 {
 namespace julia
 {
 
-/**
- * Specific AST copier that replaces certain identifiers with expressions.
- */
-class Substitution: public ASTCopier
-{
-public:
-	Substitution(std::map<std::string, Expression const*> const& _substitutions):
-		m_substitutions(_substitutions)
-	{}
-	virtual Expression translate(Expression const& _expression) override;
-
-private:
-	std::map<std::string, Expression const*> const& m_substitutions;
-};
+/// Removes statements that are just empty blocks (non-recursive).
+void removeEmptyBlocks(Block& _block);
 
 }
 }
