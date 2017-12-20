@@ -40,10 +40,6 @@ class Rematerialiser: public ASTModifier
 {
 public:
 	using ASTModifier::operator();
-	virtual void operator()(Literal&) override;
-	virtual void operator()(Identifier& _identifier) override;
-	virtual void operator()(FunctionalInstruction& _instr) override;
-	virtual void operator()(FunctionCall& _funCall) override;
 	virtual void operator()(Assignment& _assignment) override;
 	virtual void operator()(VariableDeclaration& _varDecl) override;
 	virtual void operator()(If& _if) override;
@@ -58,14 +54,10 @@ private:
 
 	/// Substitutions to be performed, if possible.
 	std::map<std::string, Expression const*> m_substitutions;
-	/// Which identifiers the current expression references.
-	std::set<std::string> m_exprReferences;
 	/// m_references[a].contains(b) <=> the current expression assigned to a references b
 	std::map<std::string, std::set<std::string>> m_references;
 	/// m_referencedBy[b].contains(a) <=> the current expression assigned to a references b
 	std::map<std::string, std::set<std::string>> m_referencedBy;
-	/// Whether the current expression is movable.
-	bool m_movable = false;
 };
 
 }

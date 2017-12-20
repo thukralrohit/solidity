@@ -33,7 +33,7 @@ using namespace dev::julia;
 void MovableChecker::operator()(Identifier const& _identifier)
 {
 	ASTWalker::operator()(_identifier);
-	m_exprReferences.insert(_identifier.name);
+	m_referencedVariables.insert(_identifier.name);
 }
 
 void MovableChecker::operator()(FunctionalInstruction const& _instr)

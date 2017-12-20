@@ -43,10 +43,11 @@ public:
 	virtual void operator()(FunctionCall const& _functionCall) override;
 
 	bool movable() const { return m_movable; }
+	std::set<std::string> const& referencedVariables() const { return m_referencedVariables; }
 
 private:
-	/// Which identifiers the current expression references.
-	std::set<std::string> m_exprReferences;
+	/// Which variables the current expression references.
+	std::set<std::string> m_referencedVariables;
 	/// Is the current expression movable or not.
 	bool m_movable = true;
 };

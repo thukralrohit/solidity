@@ -25,38 +25,13 @@
 
 #include <libsolidity/inlineasm/AsmData.h>
 
-#include <libevmasm/SemanticInformation.h>
+#include <libjulia/optimiser/Semantics.h>
 
 #include <libdevcore/CommonData.h>
 
 using namespace std;
 using namespace dev;
 using namespace dev::julia;
-
-
-void Rematerialiser::operator()(Identifier& _identifier)
-{
-	m_movable = true;
-	m_exprReferences.insert(_identifier.name);
-}
-
-void Rematerialiser::operator()(Literal&)
-{
-	m_movable = true;
-}
-
-void Rematerialiser::operator()(FunctionalInstruction& _instr)
-{
-	ASTModifier::operator()(_instr);
-	if (!eth::SemanticInformation::movable(_instr.instruction))
-		m_movable = false;
-}
-
-void Rematerialiser::operator()(FunctionCall& _call)
-{
-	ASTModifier::operator()(_call);
-	m_movable = false;
-}
 
 void Rematerialiser::operator()(Assignment& _assignment)
 {
@@ -117,14 +92,16 @@ void Rematerialiser::operator()(ForLoop& _for)
 
 void Rematerialiser::handleAssignment(set<string> const& _variables, Expression* _value)
 {
-	m_movable = true;
-	m_exprReferences.clear();
+	MovableChecker movableChecker;
 	if (_value)
+	{
 		visit(*_value);
+		movableChecker.visit(*_value);
+	}
 	if (_variables.size() == 1)
 	{
 		string const& name = *_variables.begin();
-		if (m_movable && _value)
+		if (movableChecker.movable() && _value)
 			// TODO Plus heuristic about size of value
 			// TODO If _value is null, we could use zero.
 			m_substitutions[name] = _value;
@@ -142,10 +119,11 @@ void Rematerialiser::handleAssignment(set<string> const& _variables, Expression*
 			m_referencedBy[ref].erase(name);
 		m_references[name].clear();
 	}
+	auto const& referencedVariables = movableChecker.referencedVariables();
 	for (auto const& name: _variables)
 	{
-		m_references[name] = m_exprReferences;
-		for (auto const& ref: m_exprReferences)
+		m_references[name] = referencedVariables;
+		for (auto const& ref: referencedVariables)
 			m_referencedBy[ref].insert(name);
 	}
 }
@@ -159,7 +137,6 @@ void Rematerialiser::visit(Expression& _e)
 		{
 			string name = identifier.name;
 			_e = (ASTCopier{}).translate(*m_substitutions.at(name));
-			m_exprReferences += m_references[name];
 		}
 	}
 	ASTModifier::visit(_e);
