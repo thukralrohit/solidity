@@ -58,12 +58,21 @@ public:
 	virtual void operator()(ForLoop const&);
 	virtual void operator()(Block const& _block);
 
+	virtual void visit(Statement const& _st)
+	{
+		boost::apply_visitor(*this, _st);
+	}
+	virtual void visit(Expression const& _e)
+	{
+		boost::apply_visitor(*this, _e);
+	}
+
 protected:
 	template <class T>
 	void walkVector(T const& _statements)
 	{
-		for (auto const& st: _statements)
-			boost::apply_visitor(*this, st);
+		for (auto const& statement: _statements)
+			visit(statement);
 	}
 };
 
