@@ -3,6 +3,7 @@
 Features:
  * Limit the number of warnings raised for creating abstract contracts.
  * Inline Assembly: Issue warning for using jump labels (already existed for jump instructions).
+ * General: Allow providing reason string for ``revert()``.
 
 Bugfixes:
  * Parser: Disallow event declarations with no parameter list.
